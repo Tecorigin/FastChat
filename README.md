@@ -357,7 +357,7 @@ deepspeed fastchat/train/train_lora.py \
     --logging_steps 1 \
     --model_max_length 1024 \
     --gradient_checkpointing True \
-    --deepspeed ds_zero_3.json \
+    --deepspeed playground/ds_zero_3.json \
 
 ```
 

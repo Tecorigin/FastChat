@@ -9,6 +9,7 @@ dist
 *.log
 *.log.*
 *.json
+!playground/ds_zero_3.json
 !playground/deepspeed_config_s2.json
 !playground/deepspeed_config_s3.json
 
