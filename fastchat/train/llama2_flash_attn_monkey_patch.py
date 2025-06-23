@@ -130,8 +130,8 @@ def _prepare_decoder_attention_mask(
 
 
 def replace_llama_attn_with_flash_attn():
-    cuda_major, cuda_minor = torch.cuda.get_device_capability()
-    if cuda_major < 8:
+    sdaa_major, sdaa_minor = torch.sdaa.get_device_capability()
+    if sdaa_major < 8:
         warnings.warn(
             "Flash attention is only supported on A100 or H100 GPU during training due to head dim > 64 backward."
             "ref: https://github.com/HazyResearch/flash-attention/issues/190#issuecomment-1523359593"
@@ -152,7 +152,7 @@ def test():
         num_attention_heads=8,
         max_position_embeddings=16,
     )
-    device = torch.device("cuda")
+    device = torch.device("sdaa")
     model = LlamaModel(config)
     attn = LlamaAttention(config).to(device).half()
     bsz, hs, seqlen = 2, config.hidden_size, config.max_position_embeddings

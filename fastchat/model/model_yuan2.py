@@ -132,7 +132,7 @@ def generate_stream_yuan2(
 
     # clean
     gc.collect()
-    torch.cuda.empty_cache()
+    torch.sdaa.empty_cache()
     if device == "xpu":
         torch.xpu.empty_cache()
     if device == "npu":

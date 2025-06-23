@@ -205,7 +205,7 @@ def create_multi_model_worker():
             raise ValueError(
                 f"Larger --num-gpus ({args.num_gpus}) than --gpus {args.gpus}!"
             )
-        os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus
+        os.environ["SDAA_VISIBLE_DEVICES"] = args.gpus
 
     gptq_config = GptqConfig(
         ckpt=args.gptq_ckpt or args.model_path,

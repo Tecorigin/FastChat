@@ -5,7 +5,7 @@ import warnings
 import torch
 
 os.environ["RWKV_JIT_ON"] = "1"
-os.environ["RWKV_CUDA_ON"] = "1"
+os.environ["RWKV_SDAA_ON"] = "1"
 
 from rwkv.model import RWKV
 from rwkv.utils import PIPELINE, PIPELINE_ARGS
@@ -17,15 +17,15 @@ class RwkvModel:
             "Experimental support. Please use ChatRWKV if you want to chat with RWKV"
         )
         self.config = SimpleNamespace(is_encoder_decoder=False)
-        self.model = RWKV(model=model_path, strategy="cuda fp16")
+        self.model = RWKV(model=model_path, strategy="sdaa fp16")
         # two GPUs
-        # self.model = RWKV(model=model_path, strategy="cuda:0 fp16 *20 -> cuda:1 fp16")
+        # self.model = RWKV(model=model_path, strategy="sdaa:0 fp16 *20 -> sdaa:1 fp16")
 
         self.tokenizer = None
         self.model_path = model_path
 
     def to(self, target):
-        assert target == "cuda"
+        assert target == "sdaa"
 
     def __call__(self, input_ids, use_cache, past_key_values=None):
         assert use_cache == True
@@ -65,7 +65,7 @@ class RwkvModel:
             "stop_token_ids": conv.stop_token_ids,
             "echo": False,
         }
-        res_iter = generate_stream(self, self.tokenizer, gen_params, "cuda")
+        res_iter = generate_stream(self, self.tokenizer, gen_params, "sdaa")
 
         for res in res_iter:
             pass

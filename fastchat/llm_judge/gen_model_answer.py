@@ -86,7 +86,7 @@ def get_model_answers(
     model, tokenizer = load_model(
         model_path,
         revision=revision,
-        device="cuda",
+        device="sdaa",
         num_gpus=num_gpus_per_model,
         max_gpu_memory=max_gpu_memory,
         dtype=dtype,
@@ -121,7 +121,7 @@ def get_model_answers(
                 # some models may error out when generating long outputs
                 try:
                     output_ids = model.generate(
-                        torch.as_tensor(input_ids).cuda(),
+                        torch.as_tensor(input_ids).sdaa(),
                         do_sample=do_sample,
                         temperature=temperature,
                         max_new_tokens=max_new_token,

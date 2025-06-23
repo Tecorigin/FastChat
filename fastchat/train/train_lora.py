@@ -34,9 +34,7 @@ from fastchat.train.train import (
     make_supervised_data_module,
 )
 
-from fastchat.train.llama_flash_attn_monkey_patch import (
-    replace_llama_attn_with_flash_attn,
-)
+
 
 
 @dataclass
@@ -112,8 +110,6 @@ def train():
         lora_args,
     ) = parser.parse_args_into_dataclasses()
 
-    if training_args.flash_attn:
-        replace_llama_attn_with_flash_attn()
 
     device_map = None
     world_size = int(os.environ.get("WORLD_SIZE", 1))
@@ -157,7 +153,7 @@ def train():
         model = prepare_model_for_kbit_training(
             model, use_gradient_checkpointing=training_args.gradient_checkpointing
         )
-        if not ddp and torch.cuda.device_count() > 1:
+        if not ddp and torch.sdaa.device_count() > 1:
             # keeps Trainer from trying its own DataParallelism when more than 1 gpu is available
             model.is_parallelizable = True
             model.model_parallel = True

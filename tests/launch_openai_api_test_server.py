@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     for i, (model_path, worker_name) in enumerate(models):
         cmd = (
-            f"CUDA_VISIBLE_DEVICES={i} python3 -m fastchat.serve.{worker_name} "
+            f"SDAA_VISIBLE_DEVICES={i} python3 -m fastchat.serve.{worker_name} "
             f"--model-path {model_path} --port {40000+i} "
             f"--worker-address http://localhost:{40000+i} "
         )

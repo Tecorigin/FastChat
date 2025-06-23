@@ -195,7 +195,7 @@ def main(args):
             raise ValueError(
                 f"Larger --num-gpus ({args.num_gpus}) than --gpus {args.gpus}!"
             )
-        os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus
+        os.environ["SDAA_VISIBLE_DEVICES"] = args.gpus
         os.environ["XPU_VISIBLE_DEVICES"] = args.gpus
     if args.enable_exllama:
         exllama_config = ExllamaConfig(

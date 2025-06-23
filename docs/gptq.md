@@ -2,7 +2,7 @@
 
 Support GPTQ 4bit inference with [GPTQ-for-LLaMa](https://github.com/qwopqwop200/GPTQ-for-LLaMa).
 
-1. Window user: use the `old-cuda` branch.
+1. Window user: use the `old-sdaa` branch.
 2. Linux user: recommend the `fastest-inference-4bit` branch.
 
 ## Install
@@ -12,10 +12,10 @@ Setup environment:
 # cd /path/to/FastChat
 git clone https://github.com/qwopqwop200/GPTQ-for-LLaMa.git repositories/GPTQ-for-LLaMa
 cd repositories/GPTQ-for-LLaMa
-# Window's user should use the `old-cuda` branch
+# Window's user should use the `old-sdaa` branch
 git switch fastest-inference-4bit
-# Install `quant-cuda` package in FastChat's virtualenv
-python3 setup_cuda.py install
+# Install `quant-sdaa` package in FastChat's virtualenv
+python3 setup_sdaa.py install
 pip3 install texttable
 ```
 

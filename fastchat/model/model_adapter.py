@@ -189,9 +189,9 @@ def raise_warning_for_incompatible_cpu_offloading_configuration(
                 "Continuing without cpu-offloading enabled\n"
             )
             return False
-        if device != "cuda":
+        if device != "sdaa":
             warnings.warn(
-                "CPU-offloading is only enabled when using CUDA-devices\n"
+                "CPU-offloading is only enabled when using SDAA-devices\n"
                 "Continuing without cpu-offloading enabled\n"
             )
             return False
@@ -200,7 +200,7 @@ def raise_warning_for_incompatible_cpu_offloading_configuration(
 
 def load_model(
     model_path: str,
-    device: str = "cuda",
+    device: str = "sdaa",
     num_gpus: int = 1,
     max_gpu_memory: Optional[str] = None,
     dtype: Optional[torch.dtype] = None,
@@ -234,7 +234,7 @@ def load_model(
                 warnings.warn(
                     "Intel Extension for PyTorch is not installed, it can be installed to accelerate cpu inference"
                 )
-    elif device == "cuda":
+    elif device == "sdaa":
         kwargs = {"torch_dtype": torch.float16}
         if num_gpus != 1:
             kwargs["device_map"] = "auto"
@@ -379,7 +379,7 @@ def load_model(
     ):
         model = ipex.optimize(model, dtype=kwargs["torch_dtype"])
 
-    if (device == "cuda" and num_gpus == 1 and not cpu_offloading) or device in (
+    if (device == "sdaa" and num_gpus == 1 and not cpu_offloading) or device in (
         "mps",
         "xpu",
         "npu",
@@ -501,8 +501,8 @@ def add_model_args(parser):
     parser.add_argument(
         "--device",
         type=str,
-        choices=["cpu", "cuda", "mps", "xpu", "npu"],
-        default="cuda",
+        choices=["cpu", "sdaa", "mps", "xpu", "npu"],
+        default="sdaa",
         help="The device type",
     )
     parser.add_argument(
@@ -2442,7 +2442,7 @@ class CllmAdapter(BaseModelAdapter):
             config=config,
             torch_dtype=torch.bfloat16,
             low_cpu_mem_usage=True,
-            device_map="cuda",
+            device_map="sdaa",
         )
 
         return model, tokenizer

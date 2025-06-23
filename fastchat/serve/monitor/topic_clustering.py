@@ -96,7 +96,7 @@ def get_embeddings(texts, model_name, batch_size):
             texts,
             batch_size=batch_size,
             show_progress_bar=True,
-            device="cuda",
+            device="sdaa",
             convert_to_tensor=True,
         )
 

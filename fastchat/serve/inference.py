@@ -309,7 +309,7 @@ def generate_stream(
     # Clean
     del past_key_values, out
     gc.collect()
-    torch.cuda.empty_cache()
+    torch.sdaa.empty_cache()
     if device == "xpu":
         torch.xpu.empty_cache()
     if device == "npu":

@@ -160,7 +160,7 @@ def train():
         model = prepare_model_for_kbit_training(
             model, use_gradient_checkpointing=training_args.gradient_checkpointing
         )
-        if not ddp and torch.cuda.device_count() > 1:
+        if not ddp and torch.sdaa.device_count() > 1:
             # keeps Trainer from trying its own DataParallelism when more than 1 gpu is available
             model.is_parallelizable = True
             model.model_parallel = True

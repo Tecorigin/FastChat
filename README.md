@@ -38,19 +38,22 @@ FastChat's core features include:
 - [Fine-tuning](#fine-tuning)
 - [Citation](#citation)
 
-## Install
+## Install for SDAA
 
 ### Method 1: With pip
 
 ```bash
-pip3 install "fschat[model_worker,webui]"
+cd dist
+pip3 install fschat-0.2.36-py3-none-any.whl
+pip3 install transformers-4.42.4-py3-none-any.whl 
+pip3 install peft-0.11.2.dev0-py3-none-any.whl      
 ```
 
 ### Method 2: From source
 
 1. Clone this repository and navigate to the FastChat folder
 ```bash
-git clone https://github.com/lm-sys/FastChat.git
+git clone https://github.com/Tecorigin/FastChat.git
 cd FastChat
 ```
 
@@ -63,6 +66,9 @@ brew install rust cmake
 ```bash
 pip3 install --upgrade pip  # enable PEP 660 support
 pip3 install -e ".[model_worker,webui]"
+cd dist
+pip3 install transformers-4.42.4-py3-none-any.whl 
+pip3 install peft-0.11.2.dev0-py3-none-any.whl 
 ```
 
 ## Model Weights
@@ -115,21 +121,6 @@ See the ["Not Enough Memory" section](#not-enough-memory) below if you do not ha
 python3 -m fastchat.serve.cli --model-path lmsys/vicuna-7b-v1.5
 ```
 
-#### Multiple GPUs
-You can use model parallelism to aggregate GPU memory from multiple GPUs on the same machine. 
-```
-python3 -m fastchat.serve.cli --model-path lmsys/vicuna-7b-v1.5 --num-gpus 2
-```
-
-Tips:
-Sometimes the "auto" device mapping strategy in huggingface/transformers does not perfectly balance the memory allocation across multiple GPUs.
-You can use `--max-gpu-memory` to specify the maximum memory per GPU for storing model weights.
-This allows it to allocate more memory for activations, so you can use longer context lengths or larger batch sizes. For example,
-
-```
-python3 -m fastchat.serve.cli --model-path lmsys/vicuna-7b-v1.5 --num-gpus 2 --max-gpu-memory 8GiB
-```
-
 #### CPU Only
 This runs on the CPU only and does not require GPU. It requires around 30GB of CPU memory for Vicuna-7B and around 60GB of CPU memory for Vicuna-13B.
 ```
@@ -142,7 +133,6 @@ CPU_ISA=amx python3 -m fastchat.serve.cli --model-path lmsys/vicuna-7b-v1.5 --de
 ```
 
 #### Metal Backend (Mac Computers with Apple Silicon or AMD GPUs)
-Use `--device mps` to enable GPU acceleration on Mac computers (requires torch >= 2.0).
 Use `--load-8bit` to turn on 8-bit compression.
 ```
 python3 -m fastchat.serve.cli --model-path lmsys/vicuna-7b-v1.5 --device mps --load-8bit
@@ -192,7 +182,7 @@ This requires 8-bit compression to be enabled and the bitsandbytes package to be
 - FastChat supports ExLlama V2. See [docs/exllama_v2.md](/docs/exllama_v2.md).
 - FastChat supports GPTQ 4bit inference with [GPTQ-for-LLaMa](https://github.com/qwopqwop200/GPTQ-for-LLaMa). See [docs/gptq.md](/docs/gptq.md).
 - FastChat supports AWQ 4bit inference with [mit-han-lab/llm-awq](https://github.com/mit-han-lab/llm-awq). See [docs/awq.md](/docs/awq.md).
-- [MLC LLM](https://mlc.ai/mlc-llm/), backed by [TVM Unity](https://github.com/apache/tvm/tree/unity) compiler, deploys Vicuna natively on phones, consumer-class GPUs and web browsers via Vulkan, Metal, CUDA and WebGPU.
+- [MLC LLM](https://mlc.ai/mlc-llm/), backed by [TVM Unity](https://github.com/apache/tvm/tree/unity) compiler, deploys Vicuna natively on phones, consumer-class GPUs and web browsers via Vulkan, Metal, SDAA and WebGPU.
 
 #### Use models from modelscope
 For Chinese users, you can use models from www.modelscope.cn via specify the following environment variables.
@@ -268,9 +258,9 @@ python3 -m fastchat.serve.gradio_web_server_multi --register-api-endpoint-file a
 - You can register multiple model workers to a single controller, which can be used for serving a single model with higher throughput or serving multiple models at the same time. When doing so, please allocate different GPUs and ports for different model workers.
 ```
 # worker 0
-CUDA_VISIBLE_DEVICES=0 python3 -m fastchat.serve.model_worker --model-path lmsys/vicuna-7b-v1.5 --controller http://localhost:21001 --port 31000 --worker http://localhost:31000
+SDAA_VISIBLE_DEVICES=0 python3 -m fastchat.serve.model_worker --model-path lmsys/vicuna-7b-v1.5 --controller http://localhost:21001 --port 31000 --worker http://localhost:31000
 # worker 1
-CUDA_VISIBLE_DEVICES=1 python3 -m fastchat.serve.model_worker --model-path lmsys/fastchat-t5-3b-v1.0 --controller http://localhost:21001 --port 31001 --worker http://localhost:31001
+SDAA_VISIBLE_DEVICES=1 python3 -m fastchat.serve.model_worker --model-path lmsys/fastchat-t5-3b-v1.0 --controller http://localhost:21001 --port 31001 --worker http://localhost:31001
 ```
 - You can also launch a multi-tab gradio server, which includes the Chatbot Arena tabs.
 ```bash
@@ -314,39 +304,61 @@ We use similar hyperparameters as the Stanford Alpaca.
 | --- | ---: | ---: | ---: | ---: | ---: |
 | Vicuna-13B | 128 | 2e-5 | 3 | 2048 | 0 |
 
-### Fine-tuning Vicuna-7B with Local GPUs
+### Fine-tuning Vicuna-7B with Local T100s
 
 - Install dependency
 ```bash
 pip3 install -e ".[train]"
 ```
 
-- You can use the following command to train Vicuna-7B with 4 x A100 (40GB). Update `--model_name_or_path` with the actual path to Llama weights and `--data_path` with the actual path to data.
+- You can use the following command to train Llama-2-7b with 8 x T100 (64GB). Update `--model_name_or_path` with the actual path to Llama weights and `--data_path` with the actual path to data.
+
+Remove the content related to replace_llama_attn_with_flash_attn
+```diff
+-from fastchat.train.llama_flash_attn_monkey_patch import (
+-    replace_llama_attn_with_flash_attn,
+-)
+
+-    if training_args.flash_attn:
+-        replace_llama_attn_with_flash_attn()
+```
+
 ```bash
-torchrun --nproc_per_node=4 --master_port=20001 fastchat/train/train_mem.py \
-    --model_name_or_path meta-llama/Llama-2-7b-hf \
-    --data_path data/dummy_conversation.json \
-    --bf16 True \
-    --output_dir output_vicuna \
+
+export TORCH_SDAA_ALLOC_CONF=max_split_size_mb:1024
+export OMP_NUM_THREADS=4
+export TORCH_SDAA_LINEAR_HIGHPREC=1
+export TORCH_SDAA_BADDBMM_HIGHPREC=1
+export TORCH_SDAA_BMM_HIGHPREC=1
+export TORCH_SDAA_BMM_HIGHPERF=1
+export TORCH_SDAA_BLAS_TRANSPOSE=0
+export TORCH_SDAA_FUSED_ATTN_MEM_LIMITED=1
+export TORCH_SDAA_ALIGN_NV_DEVICE=a100
+export HF_ENDPOINT=https://hf-mirror.com
+
+deepspeed fastchat/train/train_lora.py \
+    --model_name_or_path /path/llama-2-7b \
+    --lora_r 8 \
+    --lora_alpha 16 \
+    --lora_dropout 0.05 \
+    --data_path ./data/dummy_conversation.json \
+    --output_dir ./checkpoints \
     --num_train_epochs 3 \
-    --per_device_train_batch_size 2 \
-    --per_device_eval_batch_size 2 \
-    --gradient_accumulation_steps 16 \
-    --evaluation_strategy "no" \
+    --per_device_train_batch_size 1 \
+    --per_device_eval_batch_size 1 \
+    --gradient_accumulation_steps 1 \
     --save_strategy "steps" \
     --save_steps 1200 \
-    --save_total_limit 10 \
+    --save_total_limit 100 \
     --learning_rate 2e-5 \
     --weight_decay 0. \
     --warmup_ratio 0.03 \
     --lr_scheduler_type "cosine" \
     --logging_steps 1 \
-    --fsdp "full_shard auto_wrap" \
-    --fsdp_transformer_layer_cls_to_wrap 'LlamaDecoderLayer' \
-    --tf32 True \
-    --model_max_length 2048 \
+    --model_max_length 1024 \
     --gradient_checkpointing True \
-    --lazy_preprocess True
+    --deepspeed ds_zero_3.json \
+
 ```
 
 Tips:

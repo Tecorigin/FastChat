@@ -33,7 +33,7 @@ python3 -m fastchat.serve.model_worker \
     --model-path models/vicuna-7B-1.1-GPTQ-4bit-128g \
     --enable-exllama
 
-#Load model with max sequence length 2048, allocate 18 GB to CUDA:0 and 24 GB to CUDA:1.
+#Load model with max sequence length 2048, allocate 18 GB to SDAA:0 and 24 GB to SDAA:1.
 python3 -m fastchat.serve.model_worker \
     --model-path models/vicuna-7B-1.1-GPTQ-4bit-128g \
     --enable-exllama \

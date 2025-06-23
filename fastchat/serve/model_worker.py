@@ -130,10 +130,10 @@ class ModelWorker(BaseModelWorker):
                 if "logprobs" in output:
                     ret["logprobs"] = output["logprobs"]
                 yield json.dumps(ret).encode() + b"\0"
-        except torch.cuda.OutOfMemoryError as e:
+        except torch.sdaa.OutOfMemoryError as e:
             ret = {
                 "text": f"{SERVER_ERROR_MSG}\n\n({e})",
-                "error_code": ErrorCode.CUDA_OUT_OF_MEMORY,
+                "error_code": ErrorCode.SDAA_OUT_OF_MEMORY,
             }
             yield json.dumps(ret).encode() + b"\0"
         except (ValueError, RuntimeError) as e:
@@ -282,15 +282,15 @@ class ModelWorker(BaseModelWorker):
             ret["embedding"] = out_embeddings
 
             gc.collect()
-            torch.cuda.empty_cache()
+            torch.sdaa.empty_cache()
             if self.device == "xpu":
                 torch.xpu.empty_cache()
             if self.device == "npu":
                 torch.npu.empty_cache()
-        except torch.cuda.OutOfMemoryError as e:
+        except torch.sdaa.OutOfMemoryError as e:
             ret = {
                 "text": f"{SERVER_ERROR_MSG}\n\n({e})",
-                "error_code": ErrorCode.CUDA_OUT_OF_MEMORY,
+                "error_code": ErrorCode.SDAA_OUT_OF_MEMORY,
             }
         except (ValueError, RuntimeError) as e:
             ret = {
@@ -350,7 +350,7 @@ def create_model_worker():
             raise ValueError(
                 f"Larger --num-gpus ({args.num_gpus}) than --gpus {args.gpus}!"
             )
-        os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus
+        os.environ["SDAA_VISIBLE_DEVICES"] = args.gpus
 
     gptq_config = GptqConfig(
         ckpt=args.gptq_ckpt or args.model_path,

@@ -202,7 +202,7 @@ def load_compress_model(model_path, device, torch_dtype, use_fast, revision="mai
             tmp_state_dict[name] = None
             tensor = None
             gc.collect()
-            torch.cuda.empty_cache()
+            torch.sdaa.empty_cache()
             if device == "xpu":
                 torch.xpu.empty_cache()
             if device == "npu":

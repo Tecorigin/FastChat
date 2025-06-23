@@ -66,8 +66,8 @@ parser.add_argument(
 parser.add_argument(
     "--device",
     type=str,
-    choices=["cpu", "cuda", "mps", "xpu", "npu"],
-    default="cuda",
+    choices=["cpu", "sdaa", "mps", "xpu", "npu"],
+    default="sdaa",
     help="The device type",
 )
 parser.add_argument(
@@ -188,7 +188,7 @@ if args.gpus:
         raise ValueError(
             f"Larger --num-gpus ({args.num_gpus}) than --gpus {args.gpus}!"
         )
-    os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus
+    os.environ["SDAA_VISIBLE_DEVICES"] = args.gpus
 
 # 0,controller, model_worker, openai_api_server
 # 1, cmd options
